@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, render_template
 from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
@@ -38,9 +38,24 @@ class Peoples(db.Model):
 # ]
 
 
-@app.route('/')
-def home():
-    return '<h1>Homy Page</h1><p>Never see it</p>'
+
+
+
+
+@app.route('/home')
+def home_page():
+    return render_template("register.html")
+
+
+
+
+@app.route('/get', methods=['GET'])
+def get_user():
+    peoples = Peoples.query.all()
+    return jsonify(peoples)
+
+
+
 
 
 @app.route('/fetch_user/<people_id>', methods=['GET'])
@@ -52,26 +67,17 @@ def fetch_user(people_id):
 
 
 
-@app.route('/get', methods=['GET'])
-def get_user():
-    peoples = Peoples.data.all()
-    return jsonify(peoples)
-
-
-
-
 @app.route('/create_user', methods=['POST'])
 def create_user():
-        request_data = request.get_json()
-        people = Peoples(
-            first_name=request_data['first_name'],
-            last_name=request_data['last_name'],
-            email=request_data['email']
-            )
-        db.session.add(people)
-        db.session.commit()
-        
-        return 'People ID has been created'
+    first_name=request.form['first_name']
+    last_name=request.form['last_name']
+    email=request.form['email']
+    people = Peoples(first_name=first_name, last_name=last_name, email=email)
+    db.session.add(people)
+    db.session.commit()
+    return render_template("register.html", people=people)
+
+
 
 
 
